@@ -30,6 +30,21 @@
         <member name="M:DepsWebApp.Clients.NbuClient.GetRatesAsync">
             <inheritdoc/>
         </member>
+        <member name="T:DepsWebApp.Contracts.AccountDto">
+            <summary>
+            Transportation model for registration of new users
+            </summary>
+        </member>
+        <member name="P:DepsWebApp.Contracts.AccountDto.Login">
+            <summary>
+            Received login
+            </summary>
+        </member>
+        <member name="P:DepsWebApp.Contracts.AccountDto.Password">
+            <summary>
+            Received password
+            </summary>
+        </member>
         <member name="T:DepsWebApp.Contracts.NbuRate">
             <summary>
             NBU provider native data model for currency rate.
@@ -50,12 +65,11 @@
             This controller is used for account operations(authorization, authentication...)
             </summary>
         </member>
-        <member name="M:DepsWebApp.Controllers.AuthController.Register(DepsWebApp.Models.Account)">
+        <member name="M:DepsWebApp.Controllers.AuthController.Register(DepsWebApp.Contracts.AccountDto)">
             <summary>
             Method that registers an incoming account on the platform
             </summary>
             <param name="account">Account model that will be registered in api</param>
-            <exception cref="T:System.NotImplementedException">Method not implemented</exception>
         </member>
         <member name="T:DepsWebApp.Controllers.RatesController">
             <summary>
@@ -81,9 +95,14 @@
             User account model
             </summary>
         </member>
-        <member name="M:DepsWebApp.Models.Account.#ctor(System.String,System.String)">
+        <member name="M:DepsWebApp.Models.Account.#ctor(System.Int32,System.String,System.String)">
             <summary>
             Ctor for setting account parameters
+            </summary>
+        </member>
+        <member name="P:DepsWebApp.Models.Account.Id">
+            <summary>
+            Id of account
             </summary>
         </member>
         <member name="P:DepsWebApp.Models.Account.Login">

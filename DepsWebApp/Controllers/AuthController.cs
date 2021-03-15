@@ -5,6 +5,10 @@ using DepsWebApp.Services;
 using DepsWebApp.Filters;
 using DepsWebApp.Models;
 using System;
+using Microsoft.AspNetCore.Authorization;
+using DepsWebApp.Contracts;
+using System.Net;
+using DepsWebApp.Services.Interfaces;
 
 namespace DepsWebApp.Controllers
 {
@@ -16,16 +20,31 @@ namespace DepsWebApp.Controllers
     [CustomExceptionFilter]
     public class AuthController : ControllerBase
     {
+#pragma warning disable CS1591 
+        public AuthController(IAccountCoordinatorService accountCoordinator,ILogger<AuthController> logger)
+        {
+            _accountCoordinator = accountCoordinator;
+            _logger = logger;
+        }
+#pragma warning restore CS1591
         /// <summary>
         /// Method that registers an incoming account on the platform
         /// </summary>
         /// <param name="account">Account model that will be registered in api</param>
-        /// <exception cref="NotImplementedException">Method not implemented</exception>
         [HttpPost]
+        [AllowAnonymous]
         [Route("register")]
-        public IActionResult Register([FromBody] Account account)
+        [ProducesResponseType(typeof(string),(int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(ResponseError), (int)HttpStatusCode.BadRequest)]
+        public async Task<ActionResult<string>> Register([FromBody] AccountDto account)
         {
-            throw new NotImplementedException();
+            if (!ModelState.IsValid) 
+                return BadRequest(ModelState);
+            var requestResult = await _accountCoordinator.RegisterAsync(account.Login,account.Password);
+            _logger.LogInformation($"Account created [{requestResult}]");
+            return Ok(requestResult);
         }
+        private readonly IAccountCoordinatorService _accountCoordinator;
+        private readonly ILogger<AuthController> _logger;
     }
 }

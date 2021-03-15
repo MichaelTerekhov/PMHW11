@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 
 namespace DepsWebApp.Models
@@ -16,11 +17,17 @@ namespace DepsWebApp.Models
         /// <summary>
         /// Ctor for setting account parameters
         /// </summary>
-        public Account(string login, string password)
+        public Account(int id,string login, string password)
         {
+            Id = id;
             Login = login;
             Password = password;
         }
+        /// <summary>
+        /// Id of account
+        /// </summary>
+        [JsonPropertyName("id")]
+        public int Id { get; set; } 
         /// <summary>
         /// User-invented login for sign up / registration
         /// </summary>

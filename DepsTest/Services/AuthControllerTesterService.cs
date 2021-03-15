@@ -16,18 +16,46 @@ namespace DepsTest.Services
             try
             {
                 var newUri = client.BaseAddress + "Auth/register";
-                var response = await client.PostAsync(newUri, account,new JsonMediaTypeFormatter());
-
+                var response = await client.PostAsync(newUri, account, new JsonMediaTypeFormatter());
+                if ((int)response.StatusCode == 400)
+                {
+                    Console.WriteLine("It seems that you tried register with bad credentials(Login and Password length must be >= 6 characters!)\n" +
+                        $"This account credentials tried to register on the server\n{account}");
+                         return;
+                }
                 var content = await response.Content.ReadAsStringAsync();
-                var errorOccured =  JsonSerializer.Deserialize<OccuredError>(content);
+                
+                var errorOccured = new OccuredError()
+                { 
+                Code =999,
+                ErrorMsg ="Plug"
+                };
+                try
+                {
+                    errorOccured = JsonSerializer.Deserialize<OccuredError>(content);
+                }
+                catch (JsonException)
+                {
+                    Console.WriteLine("Everything is ok.\n" +
+                        "Registration completed!\n" +
+                        $"Account credentials: {account.Login}\t{account.Password}\n" +
+                        $"Expected encrypted account: {"Basic " + Convert.ToBase64String(Encoding.UTF8.GetBytes($"{account.Login}:{account.Password}"))}\n" +
+                        $"Actual encrypted account: {content}\n" +
+                        $"Are they EQUAL?\t[{content.Equals("Basic " + Convert.ToBase64String(Encoding.UTF8.GetBytes($"{account.Login}:{account.Password}")))}]\n");
+                    return;
+                }
                 if (errorOccured.Code == 228)
                 {
                     Console.WriteLine("TEST PASSED(THIS METHOD ON API SIDE NOT IMPLEMENTED)\n" +
                         $"This account credentials tried to register on the server\n{account}");
+                    return;
                 }
-                else 
+                else if (errorOccured.Code == 999)
                 {
-                    Console.WriteLine("Hmmm, its seems that this method were implemented! Or smth happened wrong!!!");
+                    Console.WriteLine("This login exists)\n" +
+                            $"This account credentials tried to register on the server\n{account}" +
+                            $"Error message:{errorOccured.ErrorMsg}\n");
+                             return;
                 }
             }
             catch (Exception ex)

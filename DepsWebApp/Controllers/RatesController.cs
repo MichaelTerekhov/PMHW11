@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Logging;
 using System.Threading.Tasks;
 using DepsWebApp.Services;
+using Microsoft.AspNetCore.Authorization;
 
 namespace DepsWebApp.Controllers
 {
@@ -9,6 +10,7 @@ namespace DepsWebApp.Controllers
     /// This controller is used for currency exchange
     /// </summary>
     [ApiController]
+    [Authorize]
     [Route("[controller]")]
     public class RatesController : ControllerBase
     {

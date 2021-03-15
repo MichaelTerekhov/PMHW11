@@ -5,6 +5,7 @@ using System;
 using DepsWebApp.Clients;
 using DepsWebApp.Options;
 using DepsWebApp.Services;
+using DepsWebApp.Services.Interfaces;
 using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
 using Microsoft.AspNetCore.Hosting;
@@ -12,6 +13,7 @@ using Microsoft.Extensions.Hosting;
 using System.Reflection;
 using System.IO;
 using DepsWebApp.Middlewares;
+using DepsWebApp.Authentication;
 
 namespace DepsWebApp
 {
@@ -32,9 +34,11 @@ namespace DepsWebApp
                 .Configure<CacheOptions>(Configuration.GetSection("Cache"))
                 .Configure<NbuClientOptions>(Configuration.GetSection("Client"))
                 .Configure<RatesOptions>(Configuration.GetSection("Rates"));
-            
-            // Add application services
+
+            services.AddSingleton<IAccountCoordinatorService,AccountCoordinatorService>();
             services.AddScoped<IRatesService, RatesService>();
+
+            services.AddAuthentication(CustomAuthSchema.Name).AddScheme<CustomAuthSchemaOptions, CustomAuthSchemaHandler>(CustomAuthSchema.Name,CustomAuthSchema.Name,null);
 
             // Add NbuClient as Transient
             services.AddHttpClient<IRatesProviderClient, NbuClient>()
@@ -50,6 +54,34 @@ namespace DepsWebApp
 
             services.AddSwaggerGen(c =>
             {
+                c.AddSecurityRequirement(
+                        new OpenApiSecurityRequirement
+                        {
+                            {
+                                new OpenApiSecurityScheme
+                                {
+                                    Reference = new OpenApiReference
+                                    {
+                                        Id = "EncryptedUser",
+                                        Type = ReferenceType.SecurityScheme
+                                    },
+                                },
+                                new string[0]
+                            }
+                        });
+
+                c.AddSecurityDefinition(
+                    "EncryptedUser",
+                    new OpenApiSecurityScheme
+                    {
+                        Type = SecuritySchemeType.ApiKey,
+                        In = ParameterLocation.Header,
+                        Scheme = "UserAccount",
+                        Name = "Authorization",
+                        Description = "EncryptedUser",
+                        BearerFormat = "EncryptedUser"
+                    });
+
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "DI Demo App API", Version = "v1" });
 
                 if (File.Exists(documentationPath))
@@ -77,6 +109,7 @@ namespace DepsWebApp
 
             app.UseRouting();
 
+            app.UseAuthentication();
 
             app.UseAuthorization();
 

@@ -58,7 +58,14 @@ namespace DepsTest
             var testingDictionary = JsonSerializer.Deserialize<ConcurrentDictionary<string, string>>(jsonSettings);
             var tasks = await Task.Factory.StartNew(() =>
                 testingDictionary.Select(x => ExchangeTestService.GetAmountInAnotherCurrency(client, x.Key, x.Value)));
+            
             await Task.WhenAll(tasks);
+
+            Console.WriteLine("\n Trying to excange(authenticated in platform)\n");
+
+            var tasks2 = await Task.Factory.StartNew(() =>
+                testingDictionary.Select(x => ExchangeTestService.GetAmountInAnotherCurrencyLogined(x.Key, x.Value, "c2Rmc2RmOnBhc3Nmcw==")));
+            await Task.WhenAll(tasks2);
         }
     }
 }
