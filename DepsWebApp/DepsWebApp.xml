@@ -95,14 +95,9 @@
             User account model
             </summary>
         </member>
-        <member name="M:DepsWebApp.Models.Account.#ctor(System.Int32,System.String,System.String)">
+        <member name="M:DepsWebApp.Models.Account.#ctor(System.String,System.String)">
             <summary>
             Ctor for setting account parameters
-            </summary>
-        </member>
-        <member name="P:DepsWebApp.Models.Account.Id">
-            <summary>
-            Id of account
             </summary>
         </member>
         <member name="P:DepsWebApp.Models.Account.Login">

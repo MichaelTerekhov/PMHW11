@@ -30,19 +30,22 @@ namespace DepsWebApp
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddHostedService<MigrationService>();
+        
             // Add options
             services
                 .Configure<CacheOptions>(Configuration.GetSection("Cache"))
                 .Configure<NbuClientOptions>(Configuration.GetSection("Client"))
                 .Configure<RatesOptions>(Configuration.GetSection("Rates"));
 
-            services.AddSingleton<IAccountCoordinatorService,AccountCoordinatorService>();
+            services.AddDbContext<DatabaseContext>(options =>
+                options.UseNpgsql(Configuration.GetConnectionString("connectionString")), ServiceLifetime.Transient);
+
+            services.AddTransient<IAccountCoordinatorService,AccountCoordinatorService>();
             services.AddScoped<IRatesService, RatesService>();
 
             services.AddAuthentication(CustomAuthSchema.Name).AddScheme<CustomAuthSchemaOptions, CustomAuthSchemaHandler>(CustomAuthSchema.Name,CustomAuthSchema.Name,null);
 
-            services.AddDbContext<DatabaseContext>(options =>
-                options.UseNpgsql(Configuration.GetConnectionString("connectionString")), ServiceLifetime.Transient);
             // Add NbuClient as Transient
             services.AddHttpClient<IRatesProviderClient, NbuClient>()
                 .ConfigureHttpClient(client => client.Timeout = TimeSpan.FromSeconds(10));
