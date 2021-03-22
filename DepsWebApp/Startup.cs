@@ -53,7 +53,8 @@ namespace DepsWebApp
             // Add CacheHostedService as Singleton
             services.AddHostedService<CacheHostedService>();
 
-            // Add batch of Swashbuckle Swagger services
+
+           // Add batch of Swashbuckle Swagger services
            var documenation = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
 
            var documentationPath = Path.Combine(AppContext.BaseDirectory, documenation);
@@ -109,7 +110,6 @@ namespace DepsWebApp
                 app.UseSwagger();
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "DI Demo App API v1"));
             }
-
 
             app.UseMiddleware<LoggerMiddleware>();
 
