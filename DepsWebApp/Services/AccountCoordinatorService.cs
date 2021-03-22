@@ -7,43 +7,54 @@ using System.Threading;
 using System.Threading.Tasks;
 using DepsWebApp.Authentication.Base64EncryptionHelper;
 using DepsWebApp.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace DepsWebApp.Services
 {
 #pragma warning disable CS1591
     public class AccountCoordinatorService : IAccountCoordinatorService
     {
-        public Task<bool> GetUserAccount(string encryptedString)
+        private readonly DatabaseContext _context;
+        
+        public AccountCoordinatorService(DatabaseContext context)
+        {
+            _context = context;
+        }
+        
+        public async Task<bool> GetUserAccount(string encryptedString)
         {
             if (encryptedString == null)
                 throw new ArgumentNullException("Encrypted string with account credentials is null!");
             if (String.IsNullOrEmpty(encryptedString.Trim()))
                 throw new NotSupportedException("This type of encrypted string not supported!");
+
             var decryptedString = AccountEncryptionToBase64.Decode(encryptedString);
             var splittedString = decryptedString.Split(':');
-            return Task.FromResult(_accounts.Values.Any(account =>
-            account.Login == splittedString[0] && account.Password == splittedString[1]));
+
+            var result = await _context.Accounts.FirstOrDefaultAsync(acc =>
+            acc.Login == splittedString[0] && acc.Password == splittedString[1]);
+
+            return result == null 
+                ? false 
+                : true;
         }
         public async Task<string> RegisterAsync(string login, string password)
         {
-            var release = await _semaphore.WaitAsync(1000);
+            if (login == null || password == null)
+                return string.Empty;
+
             try
             {
-                var id = _accounts.Count + 1;
-                var encryptedKey = (AccountEncryptionToBase64.Encode($"{login}:{password}"));
-                if (_accounts.Any(account => account.Value.Login == login))
-                    throw new ArgumentException("Account with this login already exists");
-                _accounts.TryAdd(encryptedKey, new Account(id, login, password));
-                return encryptedKey;
+                _context.Accounts.Add(new Account(login,password));
+                await _context.SaveChangesAsync();
+
+                return AccountEncryptionToBase64.Encode($"{login}:{password}");
             }
-            finally
+            catch (Exception)
             {
-                if (release) _semaphore.Release();
+                return string.Empty;
             }
         }
-        //Used encrypted string as key for future
-        private readonly ConcurrentDictionary<string,Account> _accounts = new ConcurrentDictionary<string,Account>();
-        private readonly SemaphoreSlim _semaphore = new SemaphoreSlim(1, 1);
 
     }
 #pragma warning restore CS1591

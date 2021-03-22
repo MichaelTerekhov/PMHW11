@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
 
 namespace DepsWebApp.Models
@@ -7,6 +8,7 @@ namespace DepsWebApp.Models
     /// <summary>
     /// User account model
     /// </summary>
+    [Table("Accounts")]
     public class Account
     {
 #pragma warning disable CS1591
@@ -17,20 +19,17 @@ namespace DepsWebApp.Models
         /// <summary>
         /// Ctor for setting account parameters
         /// </summary>
-        public Account(int id,string login, string password)
+        public Account(string login, string password)
         {
-            Id = id;
             Login = login;
             Password = password;
         }
-        /// <summary>
-        /// Id of account
-        /// </summary>
-        [JsonPropertyName("id")]
-        public int Id { get; set; } 
+
         /// <summary>
         /// User-invented login for sign up / registration
         /// </summary>
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.None)]
         [JsonPropertyName("login")]
         public string Login { get; private set; }
         /// <summary>

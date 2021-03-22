@@ -14,6 +14,7 @@ using System.Reflection;
 using System.IO;
 using DepsWebApp.Middlewares;
 using DepsWebApp.Authentication;
+using Microsoft.EntityFrameworkCore;
 
 namespace DepsWebApp
 {
@@ -40,6 +41,8 @@ namespace DepsWebApp
 
             services.AddAuthentication(CustomAuthSchema.Name).AddScheme<CustomAuthSchemaOptions, CustomAuthSchemaHandler>(CustomAuthSchema.Name,CustomAuthSchema.Name,null);
 
+            services.AddDbContext<DatabaseContext>(options =>
+                options.UseNpgsql(Configuration.GetConnectionString("connectionString")), ServiceLifetime.Transient);
             // Add NbuClient as Transient
             services.AddHttpClient<IRatesProviderClient, NbuClient>()
                 .ConfigureHttpClient(client => client.Timeout = TimeSpan.FromSeconds(10));
